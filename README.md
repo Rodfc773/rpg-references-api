@@ -73,9 +73,51 @@ A documentação completa dos endpoints é gerada automaticamente e está dispon
 
 * **Acesse a documentação em:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
-### 🏛️ Arquitetura
+## 🏛️ Arquitetura: Domain-Driven Design (DDD) e Contextos Delimitados
 
-O projeto segue os princípios da **Arquitetura Limpa (Clean Architecture)**, separando o código em camadas de responsabilidade bem definidas: `domain`, `application` (serviços) e `infrastructure` (controllers, repositórios).
+Este projeto adota os princípios do **Domain-Driven Design (DDD)** para gerenciar a complexidade do negócio. Em vez de uma única camada de domínio monolítica, a aplicação é dividida em **Contextos Delimitados (Bounded Contexts)**. Cada contexto representa uma área de negócio coesa e possui seu próprio modelo, com limites bem definidos.
+
+Esta abordagem resulta um **Monólito Modular**, onde cada contexto pode evoluir de forma independente e, se necessário, ser extraído para um microserviço no futuro com muito mais facilidade.
+
+A regra principal é que as dependências sempre apontam para o "coração" do negócio, o `domain` de cada contexto.
+
+### Estrutura de Pastas
+
+```
+br/ufal/orion/rpg/
+│
+├── identityaccess/         // Contexto de Identidade e Acesso
+│   ├── domain/
+│   ├── application/
+│   └── infrastructure/
+│
+├── characters/             // Contexto de Personagens e Inventário
+│   ├── domain/
+│   ├── application/
+│   └── infrastructure/
+│
+└── rulesengine/            // Contexto de Regras e Mecânicas do Jogo
+    ├── domain/
+    ├── application/
+    └── infrastructure/
+```
+
+### Detalhamento dos Contextos Delimitados
+
+#### **1. Contexto de Identidade e Acesso (`user`)**
+* **Responsabilidade:** Gerenciar a autenticação e os dados do jogador como um usuário da plataforma. É o "portal de entrada" do sistema.
+* **Entidades Principais:** `User`.
+* **Lógica:** Cadastro, login, gerenciamento de perfil e senhas.
+
+#### **2. Contexto de Personagens (`characters`)**
+* **Responsabilidade:** Gerenciar a ficha, o estado, o inventário e a progressão dos personagens. Este é o núcleo da experiência do jogador.
+* **Entidades Principais:** `Character`, `InventoryItem` (ligando `Character` a `Weapon` ou `Armor`), `CharacterSkill` (a associação de uma habilidade aprendida).
+* **Lógica:** Subir de nível, calcular atributos derivados, equipar e desequipar itens, gerenciar os "tanques" de energia (mana, aura, etc.).
+
+#### **3. Contexto de Regras e Mecânicas (`rulesengine`)**
+* **Responsabilidade:** Servir como o "livro de regras" do universo do jogo. É um catálogo de todas as possibilidades e mecânicas. Este contexto é, em grande parte, de "leitura" para os outros contextos.
+* **Entidades Principais:** `Skill` (com suas evoluções), `Weapon`, `Item`, `Armor`, `EnergyType`, `SkillEnergyModifier`.
+* **Lógica:** Definir o dano base de uma arma, o efeito de uma habilidade, o custo de energia e como os modificadores de energia alteram o comportamento das habilidades.
 
 ### 📜 Licença
 
