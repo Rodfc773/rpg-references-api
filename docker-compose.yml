@@ -1,0 +1,24 @@
+# Arquivo: docker-compose.yml
+
+version: '3.8'
+
+services:
+  # Nome do nosso serviço de banco de dados
+  postgres-db:
+    image: postgres:15-alpine  # Usamos uma imagem oficial e leve do PostgreSQL
+    container_name: rpg_postgres_db
+    environment:
+      # Define as credenciais do banco. Altere a senha se desejar.
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      # Mapeia a porta 5432 do contêiner para a porta 5432 da sua máquina local
+      - "5432:5432"
+    volumes:
+      # (Opcional, mas recomendado) Cria um volume para que os dados
+      # persistam mesmo se o contêiner for recriado.
+      - rpg-db-data:/var/lib/postgresql/data
+
+volumes:
+  rpg-db-data:

@@ -24,6 +24,7 @@ API RESTful desenvolvida para atuar como o backend de um aplicativo organizador 
 * **Spring Security:** Para a segurança da API, com autenticação e autorização baseadas em JWT (JSON Web Token).
 * **PostgreSQL / Oracle:** Banco de dados relacional para armazenar os dados do jogo.
 * **Springdoc OpenAPI:** Para a geração automática da documentação da API com Swagger UI.
+* **Docker** : Para conteinerização padronização de ambientes de teste e produção.
 
 ### ✅ Pré-requisitos
 
