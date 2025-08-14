@@ -12,7 +12,6 @@ on:
 
 # Define os "trabalhos" (jobs) a serem executados
 jobs:
-  # Nome do nosso job principal
   build:
     # A máquina virtual que o GitHub vai usar para rodar o job
     runs-on: ubuntu-latest
@@ -28,11 +27,23 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin' # Uma distribuição popular e confiável do OpenJDK
-          cache: 'maven' # Habilita o cache para as dependências do Maven, acelerando builds futuros
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Start PostgreSQL with Docker Compose
+        env:
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+        run: docker compose up -d
 
       # 3. Passo: Executar o build e os testes com o Maven Wrapper
       #    O './mvnw' garante que a versão correta do Maven será usada.
       #    O 'install' compila o código, roda os testes e cria o pacote.
       - name: Build and Test with Maven
-        run: ./mvnw -B install --file pom.xml
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+
+        run: ./mvnw -B verify
