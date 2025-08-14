@@ -1,0 +1,38 @@
+# Nome do seu workflow, que aparecerá na aba "Actions" do GitHub
+name: Java CI Build
+
+# Define os gatilhos: quando este workflow deve rodar?
+on:
+  # Roda sempre que houver um push para o branch 'main'
+  push:
+    branches: [ "main" ]
+  # Roda sempre que um Pull Request for aberto ou atualizado para o branch 'main'
+  pull_request:
+    branches: [ "main", "teste"]
+
+# Define os "trabalhos" (jobs) a serem executados
+jobs:
+  # Nome do nosso job principal
+  build:
+    # A máquina virtual que o GitHub vai usar para rodar o job
+    runs-on: ubuntu-latest
+
+    # Os passos sequenciais que o job vai executar
+    steps:
+      # 1. Passo: Baixar o seu código do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Passo: Configurar o ambiente Java (JDK 21)
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin' # Uma distribuição popular e confiável do OpenJDK
+          cache: 'maven' # Habilita o cache para as dependências do Maven, acelerando builds futuros
+
+      # 3. Passo: Executar o build e os testes com o Maven Wrapper
+      #    O './mvnw' garante que a versão correta do Maven será usada.
+      #    O 'install' compila o código, roda os testes e cria o pacote.
+      - name: Build and Test with Maven
+        run: ./mvnw -B install --file pom.xml
