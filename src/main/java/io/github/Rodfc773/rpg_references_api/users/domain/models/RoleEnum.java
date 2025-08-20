@@ -3,7 +3,7 @@ package io.github.Rodfc773.rpg_references_api.users.domain.models;
 public enum RoleEnum {
     PLAYER("Jogador comum"),
     GAME_MASTER("Mestre de mesa"),
-    NATSU("O Iluminado");
+    NATSU("Singularidade de classe 0");
 
     private final String description;
 

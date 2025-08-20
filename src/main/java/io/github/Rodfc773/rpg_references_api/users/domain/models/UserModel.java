@@ -1,6 +1,8 @@
 package io.github.Rodfc773.rpg_references_api.users.domain.models;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,29 +17,59 @@ public class UserModel implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    public UUID id;
+    private UUID id;
 
     @Column(nullable = false, unique = true)
-    public String email;
+    @Email(message = "O email deve ser válido")
+    private String email;
 
     @Column(nullable = false)
-    public String name;
+    private String name;
 
     @Column(nullable = false)
+    @Size(min=8, max=100, message = "A senha deve ter entre 8-100 caracteres")
     public String password;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "role")
-    public RoleEnum role;
+    private RoleEnum role;
 
     @Override
     public String getUsername() {
         return this.email;
     }
 
+    // GETTERS
+
     @Override
     public String getPassword() {
         return this.password;
+    }
+    public String getName(){
+        return this.name;
+    }
+    public UUID getId(){
+        return this.id;
+    }
+    public RoleEnum getRole(){
+        return this.role;
+    }
+
+    //SETTERS
+    public void setId(UUID id) {
+        this.id = id;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public void setRole(RoleEnum role) {
+        this.role = role;
     }
 
     @Override
