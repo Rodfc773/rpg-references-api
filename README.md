@@ -87,7 +87,7 @@ A regra principal é que as dependências sempre apontam para o "coração" do n
 ```
 br/ufal/orion/rpg/
 │
-├── identityaccess/         // Contexto de Identidade e Acesso
+├── users/         // Contexto de Identidade e Acesso
 │   ├── domain/
 │   ├── application/
 │   └── infrastructure/
@@ -105,9 +105,9 @@ br/ufal/orion/rpg/
 
 ### Detalhamento dos Contextos Delimitados
 
-#### **1. Contexto de Identidade e Acesso (`user`)**
+#### **1. Contexto de Identidade e Acesso (`users`)**
 * **Responsabilidade:** Gerenciar a autenticação e os dados do jogador como um usuário da plataforma. É o "portal de entrada" do sistema.
-* **Entidades Principais:** `User`.
+* **Entidades Principais:** `UserModel`.
 * **Lógica:** Cadastro, login, gerenciamento de perfil e senhas.
 
 #### **2. Contexto de Personagens (`characters`)**
