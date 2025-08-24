@@ -7,6 +7,7 @@ import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.UserAlready
 import io.github.Rodfc773.rpg_references_api.users.domain.models.RoleEnum;
 import io.github.Rodfc773.rpg_references_api.users.domain.models.UserModel;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserCreationRequestDTO;
+import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPutDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserResponseDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -84,7 +85,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO updateUser(String id, UserCreationRequestDTO newUser){
+    public UserResponseDTO updateUser(String id, UserPutDTO newUser){
         if(id.isBlank()) throw new InvalidDataException("Id inválido");
 
         var idConverted = UUID.fromString(id);
@@ -92,8 +93,20 @@ public class UserService {
         UserModel foundUser = this.userRepositoryPort.findById(idConverted).orElseThrow(() -> new ResourceNotFound("User Not Found"));
 
         foundUser.setEmail(newUser.email());
+        foundUser.setPassword(newUser.password());
+        foundUser.setName(newUser.name());
+        foundUser.setRole(newUser.roleEnum());
 
-        return  null;
+        UserResponseDTO userResponseDTO = new UserResponseDTO(
+                foundUser.getId().toString(),
+                foundUser.getName(),
+                foundUser.getUsername(),
+                foundUser.getRole()
+        );
+
+        this.userRepositoryPort.save(foundUser);
+
+        return  userResponseDTO;
 
     }
     @Transactional
