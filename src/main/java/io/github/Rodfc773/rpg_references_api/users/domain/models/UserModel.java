@@ -1,8 +1,11 @@
 package io.github.Rodfc773.rpg_references_api.users.domain.models;
 
+import io.github.Rodfc773.rpg_references_api.common.domain.model.base.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+import jdk.jfr.Timestamp;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,7 +16,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-public class UserModel implements UserDetails {
+public class UserModel extends AuditableEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -76,6 +79,5 @@ public class UserModel implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
     }
-
 
 }

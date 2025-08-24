@@ -49,4 +49,13 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    public  ResponseEntity<Object> listUsers(){
+        try{
+            var users = this.userService.listUsers();
+            return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(users);
+        }
+        catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
