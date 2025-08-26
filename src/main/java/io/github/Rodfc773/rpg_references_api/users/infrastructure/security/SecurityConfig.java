@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,35 +21,36 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final TokenService tokenService; // 2. Injeta o TokenService
 
     private static final String[] PUBLIC_ROUTES = {
-            "api/v1/users/create",
+            "/api/v1/auth/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html",
-            "/api/v1/auth/**"
+            "/swagger-ui.html"
     };
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, UserDetailsService servicer){
-        this.userDetailsService = servicer;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    // 3. O construtor agora pede o UserDetailsService e o TokenService
+    public SecurityConfig(UserDetailsService userDetailsService, TokenService tokenService) {
+        this.userDetailsService = userDetailsService;
+        this.tokenService = tokenService;
     }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        try{
-            http.csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> {
-                        auth.requestMatchers(PUBLIC_ROUTES).permitAll();
-                        auth.anyRequest().authenticated();
-                    }).sessionManagement(sess -> {
-                        sess.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS);})
-                    .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-            return http.build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PUBLIC_ROUTES).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider())
+                // 4. Cria a instância do filtro AQUI DENTRO, passando as dependências
+                .addFilterBefore(new JwtAuthenticationFilter(tokenService, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
     @Bean
     public PasswordEncoder passwordEncoder(){
