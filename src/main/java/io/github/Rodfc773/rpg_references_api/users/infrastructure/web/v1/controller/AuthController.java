@@ -22,10 +22,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO credentials){
-        String token = this.authService.login(credentials);
 
-        LoginResponseDTO response = new LoginResponseDTO(token);
-
-        return ResponseEntity.ok().body(response);
+        var token = this.authService.authenticate(credentials);
+        return ResponseEntity.ok().body(token);
     }
 }

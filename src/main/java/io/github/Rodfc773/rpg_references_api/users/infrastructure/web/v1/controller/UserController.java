@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("api/v1/users")
+@RequestMapping("/api/v1/users")
 @Tag(name = "users", description = "Rotas referentes a lógica de usuário")
 public class UserController {
 
