@@ -2,6 +2,8 @@ package io.github.Rodfc773.rpg_references_api.unit.users;
 
 import io.github.Rodfc773.rpg_references_api.users.application.port.repository.UserRepositoryPort;
 import io.github.Rodfc773.rpg_references_api.users.application.services.UserService;
+import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.UserAlreadyExists;
+import io.github.Rodfc773.rpg_references_api.users.domain.models.RoleEnum;
 import io.github.Rodfc773.rpg_references_api.users.domain.models.UserModel;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserCreationRequestDTO;
 import org.junit.jupiter.api.DisplayName;
@@ -55,6 +57,32 @@ public class CreateUserTest {
         verify(userRepositoryPort, times(1)).findByEmail(dto.email());
         verify(userRepositoryPort, times(1)).save(any(UserModel.class));
         verify(passwordEncoder, times(1)).encode(dto.password());
+
+    }
+
+    @Test
+    @DisplayName("It should fail if a user already exists")
+    void failedUserCreation(){
+
+        var dto = new UserCreationRequestDTO("Gazzeli2", "654321", "gazzeli@gmail.com");
+
+        var userAlreadyExist = new UserModel();
+
+        userAlreadyExist.setId(UUID.randomUUID());
+        userAlreadyExist.setName("Gazzeli");
+        userAlreadyExist.setRole(RoleEnum.GAME_MASTER);
+        userAlreadyExist.setPassword("123456");
+        userAlreadyExist.setEmail("gazzeli@gmail.com");
+
+        when(userRepositoryPort.findByEmail(dto.email())).thenReturn(Optional.of(userAlreadyExist));
+
+        UserAlreadyExists thrownException = assertThrows(UserAlreadyExists.class, () -> userService.createUser(dto));
+
+        assertEquals("User already exist", thrownException.getMessage());
+
+        verify(userRepositoryPort, never()).save(any(UserModel.class));
+        verify(passwordEncoder, never()).encode(dto.password());
+        verify(userRepositoryPort, times(1)).findByEmail(dto.email());
 
     }
 }
