@@ -2,6 +2,7 @@ package io.github.Rodfc773.rpg_references_api.unit.users;
 
 import io.github.Rodfc773.rpg_references_api.users.application.port.repository.UserRepositoryPort;
 import io.github.Rodfc773.rpg_references_api.users.application.services.UserService;
+import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.InvalidDataException;
 import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.UserAlreadyExists;
 import io.github.Rodfc773.rpg_references_api.users.domain.models.RoleEnum;
 import io.github.Rodfc773.rpg_references_api.users.domain.models.UserModel;
@@ -20,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
-public class CreateUserTest {
+public class UserTests {
 
     @Mock
     private UserRepositoryPort userRepositoryPort;
@@ -39,7 +40,7 @@ public class CreateUserTest {
 
         when(userRepositoryPort.findByEmail(dto.email())).thenReturn(Optional.empty());
 
-        when(passwordEncoder.encode(dto.password())).thenReturn("sehnah_hasheada_xyz");
+        when(passwordEncoder.encode(dto.password())).thenReturn("senha_hasheada_xyz");
 
         when(userRepositoryPort.save(any(UserModel.class))).thenAnswer(invocation -> {
             UserModel userSaved = invocation.getArgument(0);
@@ -84,5 +85,20 @@ public class CreateUserTest {
         verify(passwordEncoder, never()).encode(dto.password());
         verify(userRepositoryPort, times(1)).findByEmail(dto.email());
 
+    }
+
+    @Test
+    @DisplayName("Should delete users info if the user was found")
+    void shouldDeleteUserWhenPassedCorrectUser(){
+        var id = UUID.randomUUID();
+
+        when(userRepositoryPort.existsById(id)).thenReturn(true);
+
+
+        userService.deleteUser(id.toString());
+
+        verify(userRepositoryPort, times(1)).deleteById(id);
+
+        assertDoesNotThrow(()-> userService.deleteUser(id.toString()));
     }
 }
