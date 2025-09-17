@@ -10,16 +10,18 @@ import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.Use
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPutDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserResponseDTO;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.lang.module.ResolutionException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepositoryPort userRepositoryPort;
     private final PasswordEncoder passwordEncoder;
@@ -27,6 +29,14 @@ public class UserService {
     public UserService(UserRepositoryPort userRepositoryPort, PasswordEncoder passwordEncoder) {
         this.userRepositoryPort = userRepositoryPort;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepositoryPort.findByEmail(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Usuário não encontrado com o e-mail: " + username)
+                );
     }
 
     @Transactional
