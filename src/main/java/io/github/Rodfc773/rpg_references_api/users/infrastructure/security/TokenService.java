@@ -11,12 +11,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.List;
 
 
 @Service
 public class TokenService {
 
-    @Value("jwt.secret")
+    @Value("${jwt.secret}")
     private String secretKey;
 
     public DecodedJWT validateToken(String token){
@@ -39,7 +40,7 @@ public class TokenService {
 
         return JWT.create().withIssuer("referencias").withSubject(user.getId().toString())
                 .withExpiresAt(expires)
-                .withClaim("roles", Arrays.asList(user.getRole().name()))
+                .withClaim("roles", List.of(user.getRole().name()))
                 .sign(algorithm);
     }
 

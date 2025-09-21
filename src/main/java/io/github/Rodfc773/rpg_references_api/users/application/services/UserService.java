@@ -85,13 +85,12 @@ public class UserService implements UserDetailsService {
 
         UserModel foundUser = this.userRepositoryPort.findById(idConverted).orElseThrow(() -> new ResourceNotFound("User not found"));
 
-        UserResponseDTO userResponseDTO = new UserResponseDTO(
+        return new UserResponseDTO(
                 foundUser.getId().toString(),
                 foundUser.getName(),
                 foundUser.getUsername(),
-                foundUser.getRole());
-
-        return  userResponseDTO;
+                foundUser.getRole()
+        );
     }
 
     @Transactional
@@ -102,10 +101,11 @@ public class UserService implements UserDetailsService {
 
         UserModel foundUser = this.userRepositoryPort.findById(idConverted).orElseThrow(() -> new ResourceNotFound("User Not Found"));
 
-        foundUser.setEmail(newUser.email());
-        foundUser.setPassword(newUser.password());
-        foundUser.setName(newUser.name());
-        foundUser.setRole(newUser.roleEnum());
+
+        newUser.email().ifPresent(foundUser::setEmail);
+        newUser.password().ifPresent(foundUser::setPassword);
+        newUser.name().ifPresent(foundUser::setName);
+        newUser.roleEnum().ifPresent(foundUser::setRole);
 
         UserResponseDTO userResponseDTO = new UserResponseDTO(
                 foundUser.getId().toString(),
@@ -114,9 +114,12 @@ public class UserService implements UserDetailsService {
                 foundUser.getRole()
         );
 
-        this.userRepositoryPort.save(foundUser);
-
-        return  userResponseDTO;
+        try{
+            this.userRepositoryPort.save(foundUser);
+            return  userResponseDTO;
+        } catch (InvalidDataException e) {
+            throw new InvalidDataException("Some data are invalid");
+        }
 
     }
     @Transactional

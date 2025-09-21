@@ -5,6 +5,7 @@ import io.github.Rodfc773.rpg_references_api.users.application.services.UserServ
 import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.InvalidDataException;
 import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.UserAlreadyExists;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserCreationRequestDTO;
+import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPutDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +13,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -56,7 +60,7 @@ public class UserController {
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
-    @GetMapping("/users")
+    @GetMapping("/all")
     @Operation(summary = "Listagem dos usuários do sistema", description = "Rota responsável pela listagem dos usuários do sistema")
     @ApiResponses({
             @ApiResponse( responseCode = "200", content = {
@@ -99,7 +103,7 @@ public class UserController {
         }
     }
     @DeleteMapping("/user/{id}")
-    @Operation(summary = "Deleção de um usuário", description = "Rota responsável pela deleção de um usuário")
+    @Operation(summary = "Deleta de um usuário", description = "Rota responsável por deletar a rota de um usuário")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "User deleted"),
             @ApiResponse(responseCode = "400", description = "Invalid ID"),
@@ -115,6 +119,46 @@ public class UserController {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }catch (Exception ex){
             return ResponseEntity.internalServerError().body(ex.getMessage());
+        }
+    }
+
+    @PatchMapping("/user/{id}")
+    @Operation(summary = "Rota resposável por atualizar o usuário", description = "Rota responsável por realizar update dos usuários")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User updated successfuly",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation= UserPutDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Houve algum problema de validação com os dados enviados",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = InvalidDataException.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Usuário não encontrado",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceNotFound.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno do servidor",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RuntimeException.class))
+            )
+
+    })
+    public ResponseEntity<Object> updateUser(@PathVariable String id, @RequestBody UserPutDTO updateUser){
+
+        try{
+            var response = this.userService.updateUser(id, updateUser);
+
+            return ResponseEntity.ok().body(response);
+        } catch (InvalidDataException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (ResourceNotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.valueOf(500)).body(e.getMessage());
         }
     }
 }

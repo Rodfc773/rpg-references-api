@@ -2,12 +2,14 @@ package io.github.Rodfc773.rpg_references_api.users.infrastructure.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
@@ -36,7 +38,19 @@ public class SecurityConfig {
                            .requestMatchers(PUBLIC_ROUTES).permitAll()
                            .anyRequest().authenticated()
                    )
-                   .addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class);
+                   .sessionManagement(
+                           sess -> sess.sessionCreationPolicy(
+                                   org.springframework.security.config.http.SessionCreationPolicy.STATELESS
+                           )
+                   )
+                   .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                   .exceptionHandling(exception ->
+                           exception.authenticationEntryPoint(
+                                   ((request, response, authException) ->
+                                           response.setStatus(HttpStatus.UNAUTHORIZED.value())
+                                   )
+                           )
+                   );
 
            return http.build();
        } catch (Exception e) {
