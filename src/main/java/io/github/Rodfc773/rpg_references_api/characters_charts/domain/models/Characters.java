@@ -33,7 +33,7 @@ public class Characters {
     @Column(name = "blood_type", nullable = false)
     private String bloodType;
 
-    @ManyToAny(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="user_id", nullable = false)
     private UserModel user;
 
