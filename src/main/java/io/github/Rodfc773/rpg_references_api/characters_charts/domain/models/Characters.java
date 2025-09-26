@@ -17,7 +17,7 @@ public class Characters {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, unique = true, name = "photo_url")
+    @Column(nullable = false, unique = true, name = "name")
     @NotBlank
     private String name;
 
