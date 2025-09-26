@@ -7,7 +7,7 @@ import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.UserAlready
 import io.github.Rodfc773.rpg_references_api.users.domain.models.RoleEnum;
 import io.github.Rodfc773.rpg_references_api.users.domain.models.UserModel;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserCreationRequestDTO;
-import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPutDTO;
+import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPatchDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserResponseDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -94,7 +94,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public UserResponseDTO updateUser(String id, UserPutDTO newUser){
+    public UserResponseDTO updateUser(String id, UserPatchDTO newUser){
         if(id.isBlank()) throw new InvalidDataException("Id inválido");
 
         var idConverted = UUID.fromString(id);
@@ -102,10 +102,26 @@ public class UserService implements UserDetailsService {
         UserModel foundUser = this.userRepositoryPort.findById(idConverted).orElseThrow(() -> new ResourceNotFound("User Not Found"));
 
 
-        newUser.email().ifPresent(foundUser::setEmail);
-        newUser.password().ifPresent(foundUser::setPassword);
-        newUser.name().ifPresent(foundUser::setName);
-        newUser.roleEnum().ifPresent(foundUser::setRole);
+        newUser.getEmail().ifPresent(email -> {
+            if (!isEmail(email)) throw new InvalidDataException("Email inválido");
+            foundUser.setEmail(email);
+        });
+
+        newUser.getPassword().ifPresent(password -> {
+
+            if (password.length() < 8 || password.length() > 100) {
+                throw new InvalidDataException("The password must be between 8 and 100 characters");
+            }
+            foundUser.setPassword(passwordEncoder.encode(password));
+        });
+
+        newUser.getName().ifPresent(name -> {
+
+            if(name.isBlank()) throw new InvalidDataException("The field name cannot be blank");
+
+            foundUser.setName(name);
+        });
+        newUser.getRoleRole().ifPresent(foundUser::setRole);
 
         UserResponseDTO userResponseDTO = new UserResponseDTO(
                 foundUser.getId().toString(),
@@ -118,7 +134,7 @@ public class UserService implements UserDetailsService {
             this.userRepositoryPort.save(foundUser);
             return  userResponseDTO;
         } catch (InvalidDataException e) {
-            throw new InvalidDataException("Some data are invalid");
+            throw new InvalidDataException(e.getMessage());
         }
 
     }
@@ -131,5 +147,11 @@ public class UserService implements UserDetailsService {
         if(!userRepositoryPort.existsById(idConverted)) throw new ResourceNotFound("User not found");
 
         this.userRepositoryPort.deleteById(idConverted);
+    }
+
+    private boolean isEmail(String email){
+        String emailRegex = "^[a-zA-Z0-9._+&*-]+(?:\\.[a-zA-Z0-9._+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}";
+
+        return email.matches(emailRegex);
     }
 }

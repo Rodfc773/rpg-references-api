@@ -1,5 +1,6 @@
 package io.github.Rodfc773.rpg_references_api.users.domain.models;
 
+import io.github.Rodfc773.rpg_references_api.characters_charts.domain.models.Characters;
 import io.github.Rodfc773.rpg_references_api.common.domain.model.base.AuditableEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -8,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +41,11 @@ public class UserModel extends AuditableEntity implements UserDetails {
     public String getUsername() {
         return this.email;
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Characters> characters = new ArrayList<>();
+
+
 
     // GETTERS
 

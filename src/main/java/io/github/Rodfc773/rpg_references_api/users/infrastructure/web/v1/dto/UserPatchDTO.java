@@ -1,6 +1,8 @@
 package io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto;
 
 import io.github.Rodfc773.rpg_references_api.users.domain.models.RoleEnum;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import javax.management.relation.Role;
 import java.util.Optional;
@@ -19,6 +21,7 @@ public class UserPatchDTO{
         this.email = Optional.ofNullable(email);
         this.role = Optional.ofNullable(role);
     }
+
 
     public boolean isAnythingToUpdate(){
         return name.isPresent() || password.isPresent() || email.isPresent();

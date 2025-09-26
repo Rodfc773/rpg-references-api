@@ -5,6 +5,7 @@ import io.github.Rodfc773.rpg_references_api.users.application.services.UserServ
 import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.InvalidDataException;
 import io.github.Rodfc773.rpg_references_api.users.domain.exceptions.UserAlreadyExists;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserCreationRequestDTO;
+import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPatchDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPutDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.coyote.Response;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -21,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @Controller
 @RequestMapping("/api/v1/users")
@@ -47,18 +47,12 @@ public class UserController {
             @ApiResponse(responseCode = "400", description = "User already exist"),
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
-    public ResponseEntity<Object> createUser(@RequestBody UserCreationRequestDTO newUser){
+    public ResponseEntity<Object> createUser(@RequestBody @Valid UserCreationRequestDTO newUser){
 
-        try{
-            var createdUser = this.userService.createUser(newUser);
-            return ResponseEntity.status(HttpStatusCode.valueOf(201)).body(createdUser);
+        var createdUser = this.userService.createUser(newUser);
 
-        } catch (UserAlreadyExists exception) {
-            return ResponseEntity.badRequest().body(exception.getMessage());
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatusCode.valueOf(201)).body(createdUser);
+
     }
     @GetMapping("/all")
     @Operation(summary = "Listagem dos usuários do sistema", description = "Rota responsável pela listagem dos usuários do sistema")
@@ -69,13 +63,11 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public  ResponseEntity<Object> listUsers(){
-        try{
-            var users = this.userService.listUsers();
-            return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(users);
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+
+        var users = this.userService.listUsers();
+
+        return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(users);
+
     }
     @GetMapping("/user/{id}")
     @Operation(summary = "Listagem de um usuário", description = "Rota responsável pela listagem de um usuário")
@@ -88,19 +80,10 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server Error")
     })
     public ResponseEntity<Object> listOneUser(@PathVariable String id) {
-        try {
-            var user = this.userService.listOneUser(id);
-            return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(user);
-        }
-        catch (InvalidDataException exception){
-            return ResponseEntity.badRequest().body(exception.getMessage());
-        }
-        catch (ResourceNotFound exception){
-            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body(exception.getMessage());
-        }
-        catch (Exception e) {
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+
+        var user = this.userService.listOneUser(id);
+        return ResponseEntity.status(HttpStatusCode.valueOf(200)).body(user);
+
     }
     @DeleteMapping("/user/{id}")
     @Operation(summary = "Deleta de um usuário", description = "Rota responsável por deletar a rota de um usuário")
@@ -110,16 +93,11 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server Error")
     })
     public ResponseEntity<Object> deleteUser(@PathVariable String id){
-        try{
-            this.userService.deleteUser(id);
 
-            return ResponseEntity.status(HttpStatusCode.valueOf(204)).build();
+        this.userService.deleteUser(id);
 
-        } catch (InvalidDataException ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }catch (Exception ex){
-            return ResponseEntity.internalServerError().body(ex.getMessage());
-        }
+        return ResponseEntity.status(HttpStatusCode.valueOf(204)).build();
+
     }
 
     @PatchMapping("/user/{id}")
@@ -147,18 +125,10 @@ public class UserController {
             )
 
     })
-    public ResponseEntity<Object> updateUser(@PathVariable String id, @RequestBody UserPutDTO updateUser){
+    public ResponseEntity<Object> updateUser(@PathVariable String id, @RequestBody UserPatchDTO updateUser){
 
-        try{
-            var response = this.userService.updateUser(id, updateUser);
+        var response = this.userService.updateUser(id, updateUser);
 
-            return ResponseEntity.ok().body(response);
-        } catch (InvalidDataException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (ResourceNotFound e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.valueOf(500)).body(e.getMessage());
-        }
+        return ResponseEntity.ok().body(response);
     }
 }
