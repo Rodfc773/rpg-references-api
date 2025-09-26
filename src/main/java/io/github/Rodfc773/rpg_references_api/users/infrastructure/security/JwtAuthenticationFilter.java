@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -27,31 +28,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException{
         String header = request.getHeader("Authorization");
 
+
+        if(header == null || !header.startsWith("Bearer ")){
+            filterChain.doFilter(request,response);
+            return;
+        }
+
         try{
 
-            if(request.getRequestURI().startsWith("/user")){
+            var token = this.tokenService.validateToken(header);
 
-                var token = this.tokenService.validateToken(header);
-
-                if (token == null){
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    return;
-                }
-
-                var roles = token.getClaim("role").asList(Object.class);
-
-                var grants = roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString())).toList();
-
-                request.setAttribute("user_id", token.getSubject());
-
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(token, null, grants);
-
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            if (token == null){
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
+
+            var roles = token.getClaim("roles").asList(String.class);
+
+            if (roles == null) {
+                roles = Collections.emptyList();
+            }
+
+            var grants = roles.stream()
+                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                    .toList();
+
+            request.setAttribute("user_id", token.getSubject());
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(token.getSubject(), null, grants);
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(401, e.getMessage());
         }
     }
 }
