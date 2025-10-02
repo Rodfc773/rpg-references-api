@@ -1,13 +1,16 @@
 package io.github.Rodfc773.rpg_references_api.characters_charts.domain.models;
 
 
+import io.github.Rodfc773.rpg_references_api.users.domain.models.UserModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.ManyToAny;
 
 
 import java.util.UUID;
 
 @Entity
+@Table(name = "characters")
 public class Characters {
 
     @Id
@@ -24,9 +27,15 @@ public class Characters {
     @Column(name = "level", nullable = false)
     private int level;
 
+    @Column(name = "alignment", nullable = false)
     private String alignment;
 
+    @Column(name = "blood_type", nullable = false)
     private String bloodType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="user_id", nullable = false)
+    private UserModel user;
 
     public Characters(){}
 
