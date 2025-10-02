@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -35,17 +36,19 @@ public class UserModel extends AuditableEntity implements UserDetails {
     @Column(nullable = false, name = "role")
     private RoleEnum role;
 
+    @Column(name = "refresh_token", length = 512)
+    private String refreshToken;
+
+    @Column(name = "refresh_token_expiry")
+    private Instant refreshTokenExpiry;
+
     @Override
     public String getUsername() {
         return this.email;
     }
 
-    // GETTERS
-
     @Override
-    public String getPassword() {
-        return this.password;
-    }
+    public String getPassword() { return this.password; }
     public String getName(){
         return this.name;
     }
@@ -55,6 +58,8 @@ public class UserModel extends AuditableEntity implements UserDetails {
     public RoleEnum getRole(){
         return this.role;
     }
+    public String getRefreshToken() { return this.refreshToken; }
+    public Instant getRefreshTokenExpiry() { return this.refreshTokenExpiry; }
 
     //SETTERS
     public void setId(UUID id) {
@@ -72,6 +77,8 @@ public class UserModel extends AuditableEntity implements UserDetails {
     public void setRole(RoleEnum role) {
         this.role = role;
     }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken;}
+    public void setRefreshTokenExpiry(Instant refreshTokenExpiry) { this.refreshTokenExpiry = refreshTokenExpiry; }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
