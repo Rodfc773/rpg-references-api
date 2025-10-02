@@ -8,14 +8,23 @@ import io.github.Rodfc773.rpg_references_api.users.infrastructure.security.Token
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.LoginRequestDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.LoginResponseDTO;
 
+import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.NewAccessTokenResponseDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 
 @Service
 public class AuthService {
+
+    @Value("${jwt.refresh-token.expiration-days}")
+    private long expirationDays;
 
     private final UserRepositoryPort repository;
     private final PasswordEncoder passwordEncoder;
@@ -38,8 +47,23 @@ public class AuthService {
 
         if(!isPasswordCorrect) throw new InvalidDataException("The password or user name is incorrect");
 
-        var token = tokenService.generateToken(user);
+        var accessToken = tokenService.generateToken(user);
+        var refreshToken= tokenService.generateRefreshToken(user);
 
-        return new LoginResponseDTO(token);
+        user.setRefreshToken(refreshToken);
+        user.setRefreshTokenExpiry(Instant.now().plus(expirationDays, ChronoUnit.DAYS));
+        repository.save(user);
+
+        return new LoginResponseDTO(accessToken, refreshToken, "Bearer", LocalDateTime.now());
+    }
+
+    public NewAccessTokenResponseDTO refreshToken(String refreshToken){
+        UserModel user = this.repository.findByRefreshToken(refreshToken).orElseThrow(()-> new RuntimeException("Refresh token not found"));
+
+        if(user.getRefreshTokenExpiry().isBefore(Instant.now())) throw new RuntimeException("Refresh token expirado, Por favor, faça o login novamente");
+
+        String newAccessToken = tokenService.generateRefreshToken(user);
+
+        return new NewAccessTokenResponseDTO(newAccessToken);
     }
 }

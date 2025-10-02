@@ -70,12 +70,16 @@ public class AuthTests {
         when(userRepositoryPort.findByEmail(loginDto.email())).thenReturn(Optional.of(userFound));
         when(passwordEncoder.matches(loginDto.password(), userFound.getPassword())).thenReturn(true);
         when(tokenService.generateToken(userFound)).thenReturn(fakeToken);
+        when(tokenService.generateRefreshToken(userFound)).thenReturn(fakeToken);
+        when(userRepositoryPort.save(userFound)).thenReturn(null);
 
         var authenticatedUser = authService.authenticate(loginDto);
 
-        assertNotNull(authenticatedUser.token());
+        assertNotNull(authenticatedUser.accessToken());
+        assertNotNull(authenticatedUser.refreshToken());
 
         verify(userRepositoryPort, times(1)).findByEmail(loginDto.email());
+        verify(userRepositoryPort, times(1)).save(userFound);
         verify(passwordEncoder, times(1)).matches(loginDto.password(), userFound.getPassword());
     }
 
