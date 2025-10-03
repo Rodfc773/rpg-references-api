@@ -3,9 +3,6 @@ name: Java CI Build
 
 # Define os gatilhos: quando este workflow deve rodar?
 on:
-  # Roda sempre que houver um push para o branch 'main'
-  push:
-    branches: [ "main" ]
   # Roda sempre que um Pull Request for aberto ou atualizado para o branch 'main'
   pull_request:
     branches: [ "main", "teste"]
