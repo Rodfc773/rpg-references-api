@@ -1,4 +1,4 @@
-from mcr.microsoft.com/openjdk/21-jdk:latest AS builder
+FROM mcr.microsoft.com/openjdk/21-jdk:latest AS builder
 
 WORKDIR /app/
 
