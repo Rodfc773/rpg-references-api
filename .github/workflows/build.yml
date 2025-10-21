@@ -34,9 +34,7 @@ jobs:
           POSTGRES_DB: ${{ secrets.DB_NAME }}
         run: docker compose up -d
 
-      # 3. Passo: Executar o build e os testes com o Maven Wrapper
-      #    O './mvnw' garante que a versão correta do Maven será usada.
-      #    O 'install' compila o código, roda os testes e cria o pacote.
+
       - name: Build and Test with Maven
         env:
           DB_URL: ${{ secrets.DB_URL }}
@@ -44,3 +42,14 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
         run: ./mvnw -B verify
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+        with:
+          args: >
+            -Dsonar.projectKey=PROJECT_KEY
+            -Dsonar.organization=ORGANIZATION_KEY
+            -Dsonar.host.url=https://sonarcloud.io
