@@ -19,7 +19,7 @@ public class ErrorMessageDTO {
 
     public String getField(){ return this.field; }
 
-    public String getPath() { return  this.field; }
+    public String getPath() { return  this.path; }
 
     public int getStatus() { return this.status; }
 
