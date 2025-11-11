@@ -10,6 +10,7 @@ import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.Use
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserPatchDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.UserResponseDTO;
 import jakarta.transaction.Transactional;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -150,8 +151,7 @@ public class UserService implements UserDetailsService {
     }
 
     private boolean isEmail(String email){
-        String emailRegex = "^[a-zA-Z0-9._+&*-]+(?:\\.[a-zA-Z0-9._+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}";
 
-        return email.matches(emailRegex);
+        return EmailValidator.getInstance().isValid(email);
     }
 }
