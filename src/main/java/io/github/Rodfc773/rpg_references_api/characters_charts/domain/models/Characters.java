@@ -37,6 +37,10 @@ public class Characters {
     @JoinColumn(name="user_id", nullable = false)
     private UserModel user;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "character_status_id", nullable = false)
+    private CharacterStatus status;
+
     public Characters(){}
 
     // GETTERS

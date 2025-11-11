@@ -14,5 +14,6 @@ public interface UserRepositoryPort {
     List<UserModel> findAll();
     void deleteById(UUID id);
     boolean existsById(UUID id);
+    Optional<UserModel> findByRefreshToken(String refreshToken);
 
 }

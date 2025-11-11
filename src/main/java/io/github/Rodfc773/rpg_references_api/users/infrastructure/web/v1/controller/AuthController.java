@@ -3,6 +3,8 @@ package io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.contro
 import io.github.Rodfc773.rpg_references_api.users.application.services.AuthService;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.LoginRequestDTO;
 import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.LoginResponseDTO;
+import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.NewAccessTokenResponseDTO;
+import io.github.Rodfc773.rpg_references_api.users.infrastructure.web.v1.dto.RefreshTokenRequestDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,5 +27,11 @@ public class AuthController {
 
         var token = this.authService.authenticate(credentials);
         return ResponseEntity.ok().body(token);
+    }
+    @PostMapping("/refresh")
+    public ResponseEntity<NewAccessTokenResponseDTO> refreshtoken(@Valid @RequestBody RefreshTokenRequestDTO request){
+        NewAccessTokenResponseDTO responseDTO = authService.refreshToken(request.refreshToken());
+
+        return ResponseEntity.ok(responseDTO);
     }
 }

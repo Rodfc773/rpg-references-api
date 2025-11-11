@@ -20,5 +20,20 @@ services:
       # persistam mesmo se o contêiner for recriado.
       - rpg-db-data:/var/lib/postgresql/data
 
+  rpg-references-api:
+    depends_on:
+      - postgres-db
+    image: rpg-reference:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT}:8080"
+
 volumes:
   rpg-db-data:
+
+networks:
+  bridge:
