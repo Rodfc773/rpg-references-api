@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 
 @Service
@@ -38,14 +40,9 @@ public class AuthService {
 
     public LoginResponseDTO authenticate(LoginRequestDTO requestDTO) throws AuthenticationException {
 
-        UserModel user = this.repository.findByEmail(requestDTO.email()).orElseThrow(
-                () -> {throw new UsernameNotFoundException("Usuário não encontrado ou não existe");
-                }
-        );
-
-        boolean isPasswordCorrect = this.passwordEncoder.matches(requestDTO.password(), user.getPassword());
-
-        if(!isPasswordCorrect) throw new InvalidDataException("The password or user name is incorrect");
+        UserModel user = repository.findByEmail(requestDTO.email())
+                .filter(userModel -> passwordEncoder.matches(requestDTO.password(), userModel.getPassword()))
+                .orElseThrow(() -> new InvalidDataException("The password or user name is incorrect"));
 
         var accessToken = tokenService.generateToken(user);
         var refreshToken= tokenService.generateRefreshToken(user);
@@ -60,7 +57,7 @@ public class AuthService {
     public NewAccessTokenResponseDTO refreshToken(String refreshToken){
         UserModel user = this.repository.findByRefreshToken(refreshToken).orElseThrow(()-> new RuntimeException("Refresh token not found"));
 
-        if(user.getRefreshTokenExpiry().isBefore(Instant.now())) throw new RuntimeException("Refresh token expirado, Por favor, faça o login novamente");
+        if(user.getRefreshTokenExpiry().isBefore(Instant.now())) throw new RuntimeException("Refresh token expired, please do the login again");
 
         String newAccessToken = tokenService.generateRefreshToken(user);
 
