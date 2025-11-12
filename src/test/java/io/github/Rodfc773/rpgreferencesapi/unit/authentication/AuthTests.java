@@ -92,7 +92,7 @@ public class AuthTests {
 
         when(userRepositoryPort.findByEmail(loginDto.email())).thenReturn(Optional.empty());
 
-        assertThrows(UsernameNotFoundException.class, () -> authService.authenticate(loginDto));
+        assertThrows(InvalidDataException.class, () -> authService.authenticate(loginDto));
 
         verify(userRepositoryPort, times(1)).findByEmail(loginDto.email());
         verify(passwordEncoder, never()).matches(loginDto.password(), userFound.getPassword());
