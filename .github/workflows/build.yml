@@ -32,6 +32,7 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+          check-latest: true
 
       # 3. Passo: Build and Test com Maven (Gera o relatório do JaCoCo)
       - name: Build and Test with Maven (Generates JaCoCo report)
