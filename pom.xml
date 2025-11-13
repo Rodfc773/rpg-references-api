@@ -28,6 +28,9 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+        <sonar.plugin.version>4.0.0.4121</sonar.plugin.version>
+        <compiler-plugin.version>3.14.0</compiler-plugin.version>
+        <maven.compiler.release>21</maven.compiler.release>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -112,6 +115,12 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.plugin.version}</version>
             </plugin>
 		</plugins>
 	</build>
