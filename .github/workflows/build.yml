@@ -52,10 +52,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          with:
-            args: >
-              -Dsonar.projectKey=SEU_PROJECT_KEY 
-              -Dsonar.organization=SUA_ORGANIZATION_KEY
-              -Dsonar.host.url=https://sonarcloud.io
-              -Dsonar.java.coveragePlugin=jacoco
-              -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        with:
+          args: >
+            -Dsonar.projectKey=SEU_PROJECT_KEY 
+            -Dsonar.organization=SUA_ORGANIZATION_KEY
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.java.coveragePlugin=jacoco
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
