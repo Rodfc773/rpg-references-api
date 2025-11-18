@@ -48,9 +48,15 @@ jobs:
             key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
             restore-keys: ${{ runner.os }}-m2
 
-      # 3. Passo: Build and Test com Maven (Gera o relatório do JaCoCo)
-      - name: Build and analyze
+      - name: Build with Maven (or your build tool)
+        run: mvn clean install -DskipTests # Example for Maven
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2.0.0 # Use the latest version
         env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Rodfc773_rpg-references-api
+        with:
+          args: >
+            -Dsonar.projectKey=Rodfc773_rpg-references-api
+            -Dsonar.organization=${{secrets.ORGANIZATION_KEY}} # Required for SonarQube Cloud
+            -Dsonar.sources=.
