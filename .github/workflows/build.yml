@@ -7,7 +7,7 @@ on:
     branches: [ "main", "teste" ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     services:
 
@@ -32,23 +32,33 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+          check-latest: true
 
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Build, Test and Code Analysis
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+            path: ~/.m2
+            key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+            restore-keys: ${{ runner.os }}-m2
+
+      - name: Build with Maven (or your build tool)
+        run: mvn clean install -DskipTests # Example for Maven
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2.0.0 # Use the latest version
         env:
-          DB_URL: jdbc:postgresql://localhost:5432/${{ secrets.DB_NAME }}
-          DB_USERNAME: ${{ secrets.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          EXPIRATION_TIME_IN_MINUTES: ${{ secrets.EXPIRATION_TIME_IN_MINUTES }}
-          EXPIRATION_TIME_IN_DAYS: ${{ secrets.EXPIRATION_TIME_IN_DAYS }}
-
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-        run: |
-          ./mvnw -B verify sonar:sonar \
-          -Dsonar.projectKey=${{ secrets.PROJECT_KEY }} \
-          -Dsonar.organization=${{ secrets.ORGANIZATION_KEY }} \
-          -Dsonar.host.url=https://sonarcloud.io
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=Rodfc773_rpg-references-api
+            -Dsonar.organization=${{secrets.ORGANIZATION_KEY}} # Required for SonarQube Cloud
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.java.coveragePlugin=jacoco
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml

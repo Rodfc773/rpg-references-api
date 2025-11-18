@@ -1,0 +1,37 @@
+package io.github.rodfc773.rpgreferencesapi.users.infrastructure.web.v1.controller;
+
+import io.github.rodfc773.rpgreferencesapi.users.application.services.AuthService;
+import io.github.rodfc773.rpgreferencesapi.users.infrastructure.web.v1.dto.LoginRequestDTO;
+import io.github.rodfc773.rpgreferencesapi.users.infrastructure.web.v1.dto.LoginResponseDTO;
+import io.github.rodfc773.rpgreferencesapi.users.infrastructure.web.v1.dto.NewAccessTokenResponseDTO;
+import io.github.rodfc773.rpgreferencesapi.users.infrastructure.web.v1.dto.RefreshTokenRequestDTO;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/v1/auth")
+public class AuthController {
+
+    private AuthService authService;
+
+    public AuthController(AuthService service){
+        this.authService = service;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody @Valid LoginRequestDTO credentials){
+
+        var token = this.authService.authenticate(credentials);
+        return ResponseEntity.ok().body(token);
+    }
+    @PostMapping("/refresh")
+    public ResponseEntity<NewAccessTokenResponseDTO> refreshtoken(@Valid @RequestBody RefreshTokenRequestDTO request){
+        NewAccessTokenResponseDTO responseDTO = authService.refreshToken(request.refreshToken());
+
+        return ResponseEntity.ok(responseDTO);
+    }
+}
